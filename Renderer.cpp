@@ -57,6 +57,7 @@ Renderer::Renderer() : shader("verts.vs", "frags.fs") {
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CW);
 
+	shader.set_vec3("light_color", light_color);
 	enqueue_world();
 }
 
@@ -79,16 +80,13 @@ void Renderer::update() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Set uniforms
-	int model_loc = glGetUniformLocation(shader.ID, "model");
-	glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
-	int view_loc = glGetUniformLocation(shader.ID, "view");
-	glUniformMatrix4fv(view_loc, 1, GL_FALSE, glm::value_ptr(cam.view));
-	int projection_loc = glGetUniformLocation(shader.ID, "projection");
-	glUniformMatrix4fv(projection_loc, 1, GL_FALSE, glm::value_ptr(projection));
-	int color_loc = glGetUniformLocation(shader.ID, "color");
-	glUniformMatrix4fv(color_loc, 1, GL_FALSE, glm::value_ptr(color));
-
 	shader.use();
+	shader.set_mat4("model", model);
+	shader.set_mat4("view", cam.view);
+	shader.set_mat4("projection", projection);
+	shader.set_vec3("color", color);
+
+	
 	glBindVertexArray(cube_VAO);
 	draw_sun();
 	draw_world();
@@ -153,8 +151,7 @@ for (const auto& vox : voxel_queue) {
 		light_color = glm::vec3{ 1.f,1.f,1.f };
 		shader.set_mat4("model", vox.first);
 		shader.set_vec3("color", vox.second);
-		shader.set_vec3("light_color", light_color);
-		shader.set_vec3("light_pos", sun_pos);
+
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 }
@@ -164,12 +161,11 @@ void Renderer::draw_sun() {
 	color = glm::vec3{ 1.f,1.f,1.f };
 	light_color = glm::vec3{ 1.f,1.f,1.f };
 
-	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::mat4(1.0f);
 	model = glm::translate(model, sun_pos);
 	model = glm::scale(model, glm::vec3(0.5f));
-
 	shader.set_mat4("model", model);
-	shader.set_vec3("color", color);
-	shader.set_vec3("light_color", light_color);
+
+	//shader.set_vec3("light_color", light_color);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 }
