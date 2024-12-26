@@ -53,9 +53,11 @@ Renderer::Renderer() : shader("verts.vs", "frags.fs") {
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CW);
+
+	enqueue_world();
 }
 
 void Renderer::update() {
@@ -135,17 +137,22 @@ void Renderer::framebuffer_size_callback(GLFWwindow* window, int width, int heig
 	glViewport(0, 0, width, height);
 }
 
-void Renderer::draw_world() {
+void Renderer::enqueue_world() {
 	const auto specs = world.get_parsed_world();
-
 	for (const auto& spec : specs) {
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3{ spec.origin.x, spec.origin.y, spec.origin.z });
 		model = glm::scale(model, glm::vec3(spec.size_mult));
-		color = glm::vec3{ spec.color.x, spec.color.y, spec.color.z};
+		color = glm::vec3{ spec.color.x, spec.color.y, spec.color.z };
+		voxel_queue.push_back(std::make_pair(model, color));
+	}
+}
+
+void Renderer::draw_world() {
+for (const auto& vox : voxel_queue) {
 		light_color = glm::vec3{ 1.f,1.f,1.f };
-		shader.set_mat4("model", model);
-		shader.set_vec3("color", color);
+		shader.set_mat4("model", vox.first);
+		shader.set_vec3("color", vox.second);
 		shader.set_vec3("light_color", light_color);
 		shader.set_vec3("light_pos", sun_pos);
 		glDrawArrays(GL_TRIANGLES, 0, 36);

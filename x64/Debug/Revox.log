@@ -1,11 +1,11 @@
 ﻿  Renderer.cpp
-C:\Users\theja\source\repos\Revox\Revox\Renderer.cpp(72,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\theja\source\repos\Revox\Revox\Renderer.cpp(99,26): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\theja\source\repos\Revox\Revox\Renderer.cpp(99,20): warning C4244: 'initializing': conversion from 'double' to 'const float', possible loss of data
-C:\Users\theja\source\repos\Revox\Revox\Renderer.cpp(116,12): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\theja\source\repos\Revox\Revox\Renderer.cpp(117,12): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\theja\source\repos\Revox\Revox\Renderer.cpp(121,17): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\theja\source\repos\Revox\Revox\Renderer.cpp(122,17): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\theja\source\repos\Revox\Revox\Renderer.cpp(123,11): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\theja\source\repos\Revox\Revox\Renderer.cpp(124,11): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\theja\source\repos\Revox\Revox\Renderer.cpp(74,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\theja\source\repos\Revox\Revox\Renderer.cpp(101,26): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\theja\source\repos\Revox\Revox\Renderer.cpp(101,20): warning C4244: 'initializing': conversion from 'double' to 'const float', possible loss of data
+C:\Users\theja\source\repos\Revox\Revox\Renderer.cpp(118,12): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\theja\source\repos\Revox\Revox\Renderer.cpp(119,12): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\theja\source\repos\Revox\Revox\Renderer.cpp(123,17): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\theja\source\repos\Revox\Revox\Renderer.cpp(124,17): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\theja\source\repos\Revox\Revox\Renderer.cpp(125,11): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\theja\source\repos\Revox\Revox\Renderer.cpp(126,11): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   Revox.vcxproj -> C:\Users\theja\source\repos\Revox\x64\Debug\Revox.exe
