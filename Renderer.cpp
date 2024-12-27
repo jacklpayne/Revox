@@ -28,25 +28,27 @@ Renderer::Renderer() : shader("verts.vs", "frags.fs") {
 	glfwSetCursorPosCallback(window, mouse_callback);
 
 
-	// Create and fill a buffer on the GPU for the vertex data
+	// (VBO) Create and fill a buffer on the GPU for the vertex data
 	glGenBuffers(1, &cube_VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, cube_VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cube_verts), cube_verts, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, cube_verts.size() * sizeof(Vertex), cube_verts.data(), GL_STATIC_DRAW);
 
 	shader.build();
 
 	// VAO setup
 	glGenVertexArrays(1, &cube_VAO);
 	glBindVertexArray(cube_VAO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cube_verts), cube_verts, GL_STATIC_DRAW);
-		// Specify vert buffer layout & enable it
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+
+	// Specify vert buffer layout (attributes) & enable it
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
 	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+	glEnableVertexAttribArray(2);
 
 	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 200.0f);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -57,7 +59,6 @@ Renderer::Renderer() : shader("verts.vs", "frags.fs") {
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CW);
 
-	shader.set_vec3("light_color", light_color);
 	enqueue_world();
 }
 
@@ -166,6 +167,6 @@ void Renderer::draw_sun() {
 	model = glm::scale(model, glm::vec3(0.5f));
 	shader.set_mat4("model", model);
 
-	//shader.set_vec3("light_color", light_color);
+	shader.set_vec3("light_color", light_color);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 }

@@ -28,6 +28,7 @@ void World::generate_world(int LOD) {
     FastNoiseLite noise;
     noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
     noise.SetFrequency(0.005f);
+    noise.SetSeed(80085);
     for (auto& chunk : world) {
         int size = std::pow(2, LOD);
         float x_start = chunk.get_pos().x * SM::STANDARD_CHUNK_SIZE * 10;
