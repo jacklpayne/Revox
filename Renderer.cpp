@@ -137,23 +137,34 @@ void Renderer::framebuffer_size_callback(GLFWwindow* window, int width, int heig
 }
 
 void Renderer::enqueue_world() {
-	const auto specs = world.get_parsed_world();
-	for (const auto& spec : specs) {
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3{ spec.origin.x, spec.origin.y, spec.origin.z });
-		model = glm::scale(model, glm::vec3(spec.size_mult));
-		color = glm::vec3{ spec.color.x, spec.color.y, spec.color.z };
-		voxel_queue.push_back(std::make_pair(model, color));
+	const auto parsed_world = world.get_parsed_world();
+
+	// For each chunk, generate vertex data and push it to the chunk queue
+	for (const auto& parsed_chunk : parsed_world) {
+		std::vector<Vertex> chunk_vertices;
+		for (const auto& vox : parsed_chunk) {
+			auto origin = glm::vec3{ vox.origin.x, vox.origin.y, vox.origin.z };
+			auto color = glm::vec3{ vox.color.x, vox.color.y, vox.color.z };
+			auto size = glm::vec3{ vox.size_mult };
+
+			std::vector<Vertex> vox_verts;
+			for (auto& vert : cube_verts) {
+				vox_verts.push_back({ vert.position * size + origin, vert.normal, color });
+			}
+			chunk_vertices.insert(chunk_vertices.end(), vox_verts.begin(), vox_verts.end());
+		}
+		chunk_queue.push_back(chunk_vertices);
 	}
 }
 
 void Renderer::draw_world() {
-for (const auto& vox : voxel_queue) {
+for (const auto& chunk : chunk_queue) {
 		light_color = glm::vec3{ 1.f,1.f,1.f };
-		shader.set_mat4("model", vox.first);
-		shader.set_vec3("color", vox.second);
-
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		model = glm::mat4(1.f);
+		shader.set_mat4("model", model);
+		//shader.set_vec3("color", color);
+		glBufferData(GL_ARRAY_BUFFER, chunk.size() * sizeof(Vertex), chunk.data(), GL_STATIC_DRAW);
+		glDrawArrays(GL_TRIANGLES, 0, chunk.size());
 	}
 }
 

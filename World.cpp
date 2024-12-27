@@ -57,8 +57,8 @@ void World::generate_world(int LOD) {
     }
 }
 
-std::vector<SM::DrawParams> World::get_parsed_world() {
-    std::vector<SM::DrawParams>parsed_world;
+std::vector<std::vector<SM::DrawParams>> World::get_parsed_world() {
+    std::vector<std::vector<SM::DrawParams>> parsed_world;
     for (const auto& chunk : world) {
         auto parsed_chunk = chunk.get_parsed_chunk();
         // Translate from chunk coordinates to world coordinates
@@ -67,7 +67,7 @@ std::vector<SM::DrawParams> World::get_parsed_world() {
            c.origin.y += (float)(chunk.get_pos().y * SM::STANDARD_CHUNK_SIZE);
            c.origin.z += (float)(chunk.get_pos().z * SM::STANDARD_CHUNK_SIZE);
         }
-        parsed_world.insert(parsed_world.end(), parsed_chunk.begin(), parsed_chunk.end());
+        parsed_world.push_back(parsed_chunk);
     }
     return parsed_world;
 }
