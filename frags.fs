@@ -2,10 +2,10 @@
 
 in vec3 Normal;
 in vec3 frag_pos;
+in vec3 color;
 
 out vec4 FragColor;
 
-uniform vec3 color;
 uniform vec3 light_color;
 uniform vec3 light_pos;
 

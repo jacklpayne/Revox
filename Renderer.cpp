@@ -8,7 +8,7 @@ Renderer::Renderer() : shader("verts.vs", "frags.fs") {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(1080, 720, "Revox", NULL, NULL);
+	window = glfwCreateWindow(1920, 1080, "Revox", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	// Associates this renderer with the window so that anything
 	// that knows about the window can access it
@@ -21,7 +21,7 @@ Renderer::Renderer() : shader("verts.vs", "frags.fs") {
 	}
 
 	// Tell OpenGL the rendering window (viewport) size
-	glViewport(0, 0, 1080, 720);
+	glViewport(0, 0, 1920, 1080);
 
 	// Register the callback for changing the OpenGL viewport size when the GLFW window is resized
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -82,12 +82,9 @@ void Renderer::update() {
 
 	// Set uniforms
 	shader.use();
-	shader.set_mat4("model", model);
 	shader.set_mat4("view", cam.view);
 	shader.set_mat4("projection", projection);
-	shader.set_vec3("color", color);
 
-	
 	glBindVertexArray(cube_VAO);
 	draw_sun();
 	draw_world();

@@ -40,7 +40,7 @@ private:
 	glm::vec3 light_color{ 1.f, 1.f, 1.f };
 	glm::vec3 sun_pos{ 12.f, 8.f, 4.f };
 
-	World world{ 3 };
+	World world{ 5 };
 	void enqueue_world();
 	void draw_world();
 	void draw_sun();
