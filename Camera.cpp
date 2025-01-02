@@ -12,7 +12,7 @@ Camera::Camera() {
 }
 
 void Camera::update() {
-	view = glm::lookAt(pos, pos + front, camera_up);
+	view = glm::lookAt(pos, pos + dir, up);
 	if (pitch > 89.0f)
 		pitch = 89.0f;
 	if (pitch < -89.0f)

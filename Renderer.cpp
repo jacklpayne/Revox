@@ -51,13 +51,14 @@ Renderer::Renderer() : shader("verts.vs", "frags.fs") {
 	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 200.0f);
 
 	glEnable(GL_DEPTH_TEST);
+	glfwWindowHint(GLFW_DEPTH_BITS, 32);
 	glDepthFunc(GL_LESS);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	//glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-	glFrontFace(GL_CW);
+	glFrontFace(GL_CCW);
 
 	enqueue_world();
 }
@@ -135,10 +136,10 @@ void Renderer::framebuffer_size_callback(GLFWwindow* window, int width, int heig
 
 void Renderer::enqueue_world() {
 	const auto parsed_world = world.get_parsed_world();
-
+	std::vector<Vertex> chunk_vertices;
 	// For each chunk, generate vertex data and push it to the chunk queue
 	for (const auto& parsed_chunk : parsed_world) {
-		std::vector<Vertex> chunk_vertices;
+		
 		for (const auto& vox : parsed_chunk) {
 			auto origin = glm::vec3{ vox.origin.x, vox.origin.y, vox.origin.z };
 			auto color = glm::vec3{ vox.color.x, vox.color.y, vox.color.z };
@@ -150,8 +151,9 @@ void Renderer::enqueue_world() {
 			}
 			chunk_vertices.insert(chunk_vertices.end(), vox_verts.begin(), vox_verts.end());
 		}
-		chunk_queue.push_back(chunk_vertices);
+		
 	}
+	chunk_queue.push_back(chunk_vertices);
 }
 
 void Renderer::draw_world() {
