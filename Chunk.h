@@ -29,8 +29,6 @@ private:
 	int count_children(int node_idx);
 	int get_child_offset(int node_idx, uint8_t child_bit);
 
-	void generate_chunk();
-
 	std::vector<Node> chunk;
 };
 

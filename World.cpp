@@ -1,6 +1,11 @@
 #include "World.h"
 
 World::World(int _render_distance) : render_distance(_render_distance) {
+    generate_world(5);
+}
+
+void World::init_world() {
+    world.clear();
     // Start with the origin
     std::vector<SM::vec3<int>> spiral_coordinates;
     spiral_coordinates.push_back(SM::vec3<int>{0, 0, 0});
@@ -20,15 +25,23 @@ World::World(int _render_distance) : render_distance(_render_distance) {
     for (const auto& coord : spiral_coordinates) {
         world.push_back(Chunk{ coord });
     }
-    generate_world(5);
 }
 
+
 void World::generate_world(int LOD) {
+    init_world();
     // Create and configure FastNoise object
     FastNoiseLite noise;
     noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
     noise.SetFrequency(0.005f);
-    noise.SetSeed(80085);
+
+
+    std::mt19937 generator(static_cast<unsigned>(std::chrono::steady_clock::now().time_since_epoch().count()));
+    std::uniform_int_distribution<int> distribution(0, 8000);
+    int random_seed = distribution(generator);
+    noise.SetSeed(random_seed);
+    std::cout << "Seed: " << random_seed << "\n";
+
     for (auto& chunk : world) {
         int size = std::pow(2, LOD);
         float x_start = chunk.get_pos().x * SM::STANDARD_CHUNK_SIZE * 10;
@@ -42,14 +55,14 @@ void World::generate_world(int LOD) {
                 float z_sample = z_start + z * z_step;
                 int y = noise.GetNoise(x_sample, z_sample) * 10;
                 if (y <= 3) {
-                    chunk.insert(0b1001011000111000, SM::vec3<int>{x, y, z}, LOD);
+                    chunk.insert(0b1001011000111000, SM::vec3<int>{x, y, z}, LOD); // Green
                 }
                 else if (y <= 7) {
                     
-                    chunk.insert(0b1001011101101000, SM::vec3<int>{x, y, z}, LOD);
+                    chunk.insert(0b1001011101101000, SM::vec3<int>{x, y, z}, LOD); // Orange
                 }
                 else if (y <= 10) {
-                    chunk.insert(0b1001011000101101, SM::vec3<int>{x, y, z}, LOD);
+                    chunk.insert(0b1001011000101101, SM::vec3<int>{x, y, z}, LOD); // Blue
                 }
                 
             }
@@ -75,3 +88,4 @@ std::vector<std::vector<SM::DrawParams>> World::get_parsed_world() {
 std::vector<SM::DrawParams> World::get_parsed_chunk(int idx) {
     return world[idx].get_parsed_chunk();
 }
+

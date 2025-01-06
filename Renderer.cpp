@@ -7,6 +7,7 @@ Renderer::Renderer() : shader("verts.vs", "frags.fs") {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_DEPTH_BITS, 32);
 
 	window = glfwCreateWindow(1920, 1080, "Revox", NULL, NULL);
 	glfwMakeContextCurrent(window);
@@ -27,6 +28,20 @@ Renderer::Renderer() : shader("verts.vs", "frags.fs") {
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 
+	// Init imgui
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	int fb_width, fb_height;
+	glfwGetFramebufferSize(window, &fb_width, &fb_height);
+	ImGui::GetIO().DisplaySize = ImVec2((float)fb_width, (float)fb_height);
+	ImGui::GetIO().DisplayFramebufferScale = ImVec2(
+		(float)fb_width / 1920.f,
+		(float)fb_height / 1080.f
+	);
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 330");
+	
 
 	// (VBO) Create and fill a buffer on the GPU for the vertex data
 	glGenBuffers(1, &cube_VBO);
@@ -48,10 +63,10 @@ Renderer::Renderer() : shader("verts.vs", "frags.fs") {
 	glEnableVertexAttribArray(2);
 
 	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 200.0f);
+	projection = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 200.0f);
+
 
 	glEnable(GL_DEPTH_TEST);
-	glfwWindowHint(GLFW_DEPTH_BITS, 32);
 	glDepthFunc(GL_LESS);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -68,6 +83,9 @@ void Renderer::update() {
 		glfwTerminate();
 		return;
 	}
+
+	draw_debug_window();
+
 	process_input();
 	cam.update();
 	glfwSwapBuffers(window);
@@ -92,9 +110,6 @@ void Renderer::update() {
 }
 
 void Renderer::process_input() {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
-
 	const float speed = 6.5 * delta_time;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		cam.pos += speed * cam.front;
@@ -104,11 +119,32 @@ void Renderer::process_input() {
 		cam.pos -= glm::normalize(glm::cross(cam.front, cam.camera_up)) * speed;
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		cam.pos += glm::normalize(glm::cross(cam.front, cam.camera_up)) * speed;
+
+	static bool escape_key_pressed = false;
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		if (!escape_key_pressed) {
+			if (mouse_freed) {
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			}
+			else {
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			}
+			mouse_freed = !mouse_freed;
+			escape_key_pressed = true;
+		}
+	}
+	else if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE) {
+		escape_key_pressed = false;
+	}
 }
 
 void Renderer::mouse_callback(GLFWwindow* window, double x_pos, double y_pos) {
 	// Get the renderer through the window to access its camera
 	Renderer* renderer = static_cast<Renderer*>(glfwGetWindowUserPointer(window));
+	if (renderer->mouse_freed) {
+		return;
+	}
+
 	float& last_x = renderer->cam.last_x;
 	float& last_y = renderer->cam.last_y;
 	if (renderer->cam.first_mouse) {
@@ -135,11 +171,11 @@ void Renderer::framebuffer_size_callback(GLFWwindow* window, int width, int heig
 }
 
 void Renderer::enqueue_world() {
+	chunk_queue.clear();
 	const auto parsed_world = world.get_parsed_world();
-	std::vector<Vertex> chunk_vertices;
 	// For each chunk, generate vertex data and push it to the chunk queue
 	for (const auto& parsed_chunk : parsed_world) {
-		
+		std::vector<Vertex> chunk_vertices;
 		for (const auto& vox : parsed_chunk) {
 			auto origin = glm::vec3{ vox.origin.x, vox.origin.y, vox.origin.z };
 			auto color = glm::vec3{ vox.color.x, vox.color.y, vox.color.z };
@@ -151,9 +187,8 @@ void Renderer::enqueue_world() {
 			}
 			chunk_vertices.insert(chunk_vertices.end(), vox_verts.begin(), vox_verts.end());
 		}
-		
+		chunk_queue.push_back(chunk_vertices);
 	}
-	chunk_queue.push_back(chunk_vertices);
 }
 
 void Renderer::draw_world() {
@@ -179,4 +214,34 @@ void Renderer::draw_sun() {
 
 	shader.set_vec3("light_color", light_color);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+}
+
+void Renderer::draw_debug_window() {
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui::NewFrame();
+
+	static int render_distance = 5;
+
+	// Set the position and size of the debug window
+	ImGui::SetNextWindowPos(ImVec2(10, ImGui::GetIO().DisplaySize.y - 200), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(300, 150), ImGuiCond_Always);
+
+	// Begin the window
+	ImGui::Begin("Debug", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+
+	// Slider
+	ImGui::SliderInt("Distance", &render_distance, 0, 5);
+
+	// Button
+	if (ImGui::Button("Regenerate")) {
+		world.set_render_distance(render_distance);
+		world.generate_world(5);
+		enqueue_world();
+	}
+
+	// End the window
+	ImGui::End();
+
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

@@ -12,6 +12,10 @@
 #include "Camera.h"
 #include "World.h"
 
+#include "imgui.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_glfw.h"
+
 class Renderer {
 public:
 	Renderer();
@@ -19,6 +23,8 @@ public:
 private:
 	float delta_time{};
 	float last_frame{};
+
+    bool mouse_freed;
 
 	GLFWwindow* window;
 	Camera cam{};
@@ -44,6 +50,7 @@ private:
 	void enqueue_world();
 	void draw_world();
 	void draw_sun();
+    void draw_debug_window();
 
 	struct Vertex {
 		glm::vec3 position;

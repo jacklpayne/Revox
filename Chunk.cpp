@@ -35,7 +35,7 @@ void Chunk::parse_chunk(size_t& index, int level, uint8_t quadrant,
     if (index >= chunk.size()) return;
 
     const Node& node = chunk[index];
-    bool leaf = (node & 0x8000);
+    bool is_leaf = (node & 0x8000);
     uint16_t mask_or_data = (node & 0x7FFF);
 
     index++;
@@ -53,7 +53,7 @@ void Chunk::parse_chunk(size_t& index, int level, uint8_t quadrant,
     float size_mult = (level == 0) ? SM::STANDARD_CHUNK_SIZE : (float)SM::STANDARD_CHUNK_SIZE / (std::pow(2,level));
     SM::vec3<float> origin = (rel_pos * size_mult * 0.5f) + prev_origin;
 
-    if (leaf) {
+    if (is_leaf) {
         uint16_t color_bits = node & 0x1FF;  // 111111111
         // Extract RGB components
         uint8_t r = (color_bits >> 6) & 0x7; // Get the top 3 bits (RRR)
@@ -96,10 +96,8 @@ void Chunk::insert(uint16_t data, SM::vec3<int> pos, int level) {
     *node = data;
 }
 
-// I wrote this off a 16 ounce pabst blue ribbon
 Node* Chunk::get_insertion_node(SM::vec3<int> range_start, SM::vec3<int> range_end, SM::vec3<int> pos, 
     int fin_level, int curr_level, int node_idx) {
-
     if (fin_level == curr_level) {
         return &chunk[node_idx];
     }
@@ -119,7 +117,6 @@ Node* Chunk::get_insertion_node(SM::vec3<int> range_start, SM::vec3<int> range_e
     uint8_t child_bit = (in_front_octant << 2) | 
                         (in_upper_octant << 1) | 
                         (in_right_octant);
-    //int child_offset = __popcnt(chunk[node_idx] & ((1 << child_bit) - 1)) + 1; // Counts the existent preceding children
 
     // Convert to branch if leaf
     bool is_leaf = (chunk[node_idx] & 0x8000);
@@ -188,9 +185,5 @@ int Chunk::get_child_offset(int node_idx, uint8_t child_bit) {
         }
     }
     return offset;
-}
-
-void Chunk::generate_chunk() {
-
 }
 
