@@ -230,7 +230,7 @@ void Renderer::draw_debug_window() {
 	ImGui::Begin("Debug", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 
 	// Slider
-	ImGui::SliderInt("Distance", &render_distance, 0, 5);
+	ImGui::SliderInt("Distance", &render_distance, 1, 5);
 
 	// Button
 	if (ImGui::Button("Regenerate")) {
